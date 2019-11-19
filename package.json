@@ -1,0 +1,29 @@
+{
+  "name": "flashforge",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/flashforge.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^12.12.9",
+    "tslint": "^5.20.1",
+    "tslint-config-standard": "^9.0.0",
+    "typescript": "^3.7.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p .",
+    "pretest": "tslint -p .",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SomeoneWeird/node-flashforge.git"
+  },
+  "author": "Adam Brady <adam@boxxen.org>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SomeoneWeird/node-flashforge/issues"
+  },
+  "homepage": "https://github.com/SomeoneWeird/node-flashforge#readme"
+}
