@@ -4,6 +4,8 @@ export interface CommandParseResult<T, R = {}> {
 }
 
 export enum Command {
+  M27 = 'M27',
+  Status = 'M27',
   M105 = 'M105',
   Temperature = 'M105',
   M601 = 'M601',
@@ -63,7 +65,11 @@ export interface TemperatureInformation extends CommandParseResult<Command.Tempe
   bed: TemperaturePair
 }> {}
 
-export type ParseResult = ControlStatus | ControlRelease | PrinterInformation | EndstopStatus | TemperatureInformation
+export interface StatusInformation extends CommandParseResult<Command.Status, {
+  percentage: number
+}> {}
+
+export type ParseResult = ControlStatus | ControlRelease | PrinterInformation | EndstopStatus | TemperatureInformation | StatusInformation
 
 export function parseCommand (buffer: Buffer): ParseResult | null {
   const lines = buffer.toString().split('\r\n')
@@ -76,6 +82,7 @@ export function parseCommand (buffer: Buffer): ParseResult | null {
   const cmd = cmdMatch[1]
 
   switch (cmd) {
+    case Command.M27: return parseStatusInformation(lines)
     case Command.M105: return parseTemperatureInformation(lines)
     case Command.M115: return parsePrinterInformation(lines)
     case Command.M119: return parseEndstopStatus(lines)
@@ -142,6 +149,18 @@ function parseLines ({ data, overrides }: ParseLinesOptions): Array<string[] | n
   })
 
   return pairs
+}
+
+function parseStatusInformation (data: string[]): StatusInformation | null {
+  const match = data.toString().match(/(\d{1,3})\/(\d{1,3})/)
+  if (!match) return null
+
+  return {
+    command: Command.Status,
+    result: {
+      percentage: parseInt(match[1])
+    }
+  }
 }
 
 function parseTemperatureInformation (data: string[]): TemperatureInformation | null {

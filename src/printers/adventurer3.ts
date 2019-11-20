@@ -4,5 +4,6 @@ export const enum commands {
   heartbeat = '~M27',
   info = '~M115',
   endstopStatus = '~M119',
-  temperature = '~M105'
+  temperature = '~M105',
+  status = '~M27'
 }

@@ -2,7 +2,7 @@ import * as dgram from 'dgram'
 import { EventEmitter } from 'events'
 import * as net from 'net'
 
-import { Command, EndstopStatus, parseCommand, PrinterInformation, TemperatureInformation } from './parser'
+import { Command, EndstopStatus, parseCommand, PrinterInformation, StatusInformation, TemperatureInformation } from './parser'
 import { commands } from './printers/adventurer3'
 
 interface PrinterOptions {
@@ -15,6 +15,7 @@ export declare interface Printer {
   on (event: 'information', listener: (information: PrinterInformation['result']) => void): this
   on (event: 'endstop', listener: (endstop: EndstopStatus['result']) => void): this
   on (event: 'temperature', listener: (information: TemperatureInformation['result']) => void): this
+  on (event: 'status', listener: (status: StatusInformation['result']) => void): this
 }
 
 export class Printer extends EventEmitter {
@@ -72,6 +73,10 @@ export class Printer extends EventEmitter {
     if (parsed.command === Command.Temperature) {
       this.emit('temperature', parsed.result)
     }
+
+    if (parsed.command === Command.Status) {
+      this.emit('status', parsed.result)
+    }
   }
 }
 
@@ -107,10 +112,16 @@ export function findPrinters (): Promise<Printer[]> {
 }
 
 // findPrinters().then((printers) => {
-//   printers[0].on('temperature', (info) => {
-//     console.log('Got temperature information:', info)
+//   printers[0].on('status', (status) => {
+//     console.log(`Got status - percent complete: ${status.percentage}%`)
+
 //     console.log('Sending disconnect')
 //     printers[0].send(commands.disconnect)
+//   })
+
+//   printers[0].on('temperature', (info) => {
+//     console.log('Got temperature information:', info)
+//     printers[0].send(commands.status)
 //   })
 
 //   printers[0].on('endstop', (endstop) => {
