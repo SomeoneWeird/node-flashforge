@@ -3,5 +3,6 @@ export const enum commands {
   disconnect = '~M602',
   heartbeat = '~M27',
   info = '~M115',
-  endstopStatus = '~M119'
+  endstopStatus = '~M119',
+  temperature = '~M105'
 }

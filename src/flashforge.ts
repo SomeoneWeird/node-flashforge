@@ -2,7 +2,7 @@ import * as dgram from 'dgram'
 import { EventEmitter } from 'events'
 import * as net from 'net'
 
-import { Command, EndstopStatus, parseCommand, PrinterInformation } from './parser'
+import { Command, EndstopStatus, parseCommand, PrinterInformation, TemperatureInformation } from './parser'
 import { commands } from './printers/adventurer3'
 
 interface PrinterOptions {
@@ -14,6 +14,7 @@ export declare interface Printer {
   on (event: 'connected' | 'disconnected', listener: () => void): this
   on (event: 'information', listener: (information: PrinterInformation['result']) => void): this
   on (event: 'endstop', listener: (endstop: EndstopStatus['result']) => void): this
+  on (event: 'temperature', listener: (information: TemperatureInformation['result']) => void): this
 }
 
 export class Printer extends EventEmitter {
@@ -67,6 +68,10 @@ export class Printer extends EventEmitter {
     if (parsed.command === Command.EndstopStatus) {
       this.emit('endstop', parsed.result)
     }
+
+    if (parsed.command === Command.Temperature) {
+      this.emit('temperature', parsed.result)
+    }
   }
 }
 
@@ -102,10 +107,17 @@ export function findPrinters (): Promise<Printer[]> {
 }
 
 // findPrinters().then((printers) => {
-//   printers[0].on('endstop', (endstop) => {
-//     console.log('Got printer endstop status:', endstop)
+//   printers[0].on('temperature', (info) => {
+//     console.log('Got temperature information:', info)
 //     console.log('Sending disconnect')
 //     printers[0].send(commands.disconnect)
+//   })
+
+//   printers[0].on('endstop', (endstop) => {
+//     console.log('Got printer endstop status:', endstop)
+
+//     console.log('Getting temperature info')
+//     printers[0].send(commands.temperature)
 //   })
 
 //   printers[0].on('information', (information) => {

@@ -4,6 +4,8 @@ export interface CommandParseResult<T, R = {}> {
 }
 
 export enum Command {
+  M105 = 'M105',
+  Temperature = 'M105',
   M601 = 'M601',
   Control = 'M601',
   M602 = 'M602',
@@ -51,7 +53,17 @@ export interface EndstopStatus extends CommandParseResult<Command.EndstopStatus,
   }
 }> {}
 
-export type ParseResult = ControlStatus | ControlRelease | PrinterInformation | EndstopStatus
+interface TemperaturePair {
+  current: number,
+  target: number
+}
+
+export interface TemperatureInformation extends CommandParseResult<Command.Temperature, {
+  tools: TemperaturePair[],
+  bed: TemperaturePair
+}> {}
+
+export type ParseResult = ControlStatus | ControlRelease | PrinterInformation | EndstopStatus | TemperatureInformation
 
 export function parseCommand (buffer: Buffer): ParseResult | null {
   const lines = buffer.toString().split('\r\n')
@@ -64,6 +76,7 @@ export function parseCommand (buffer: Buffer): ParseResult | null {
   const cmd = cmdMatch[1]
 
   switch (cmd) {
+    case Command.M105: return parseTemperatureInformation(lines)
     case Command.M115: return parsePrinterInformation(lines)
     case Command.M119: return parseEndstopStatus(lines)
     case Command.M601: return { command: Command.M601, result: {} }
@@ -129,6 +142,22 @@ function parseLines ({ data, overrides }: ParseLinesOptions): Array<string[] | n
   })
 
   return pairs
+}
+
+function parseTemperatureInformation (data: string[]): TemperatureInformation | null {
+  // TODO: This needs to be expanded to capture multiple tools
+  const match = data.toString().match(/T0:([^\/]+)\s?\/([^\]d]+)\sB:([^\/]+)\s?\/([^\]d]+)/)
+  if (!match) return null
+
+  return {
+    command: Command.Temperature,
+    result: {
+      tools: [
+        { current: parseInt(match[1]), target: parseInt(match[2]) }
+      ],
+      bed: { current: parseInt(match[3]), target: parseInt(match[4]) }
+    }
+  }
 }
 
 function parsePrinterInformation (data: string[]): PrinterInformation | null {
