@@ -3,15 +3,37 @@
   "version": "1.0.0",
   "description": "",
   "main": "build/flashforge.js",
-  "dependencies": {},
+  "bin": {
+    "flashforge": "./bin/run"
+  },
+  "dependencies": {
+    "@oclif/command": "^1.5.19",
+    "@oclif/config": "^1.13.3",
+    "@oclif/plugin-help": "^2.2.1",
+    "@types/cli-progress": "^1.8.1",
+    "chalk": "^3.0.0",
+    "cli-progress": "^3.4.0",
+    "node-notifier": "^6.0.0",
+    "tslib": "^1.10.0"
+  },
   "devDependencies": {
+    "@oclif/dev-cli": "^1.22.2",
     "@types/node": "^12.12.9",
+    "@types/node-notifier": "^5.4.0",
+    "eslint": "^6.6.0",
+    "eslint-config-oclif": "^3.1.0",
+    "eslint-config-oclif-typescript": "^0.1.0",
+    "globby": "^10.0.1",
     "tslint": "^5.20.1",
     "tslint-config-standard": "^9.0.0",
     "typescript": "^3.7.2"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "postpack": "rm -f oclif.manifest.json",
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "echo NO TESTS",
+    "version": "oclif-dev readme && git add README.md",
     "build": "tsc -p .",
     "pretest": "tslint -p .",
     "prepublish": "npm run build"
@@ -25,5 +47,18 @@
   "bugs": {
     "url": "https://github.com/SomeoneWeird/node-flashforge/issues"
   },
-  "homepage": "https://github.com/SomeoneWeird/node-flashforge#readme"
+  "homepage": "https://github.com/SomeoneWeird/node-flashforge#readme",
+  "oclif": {
+    "commands": "./build/commands",
+    "bin": "flashforge",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "files": [
+    "/bin",
+    "/build",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ]
 }

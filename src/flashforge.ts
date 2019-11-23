@@ -16,6 +16,11 @@ export declare interface Printer {
   on (event: 'endstop', listener: (endstop: EndstopStatus['result']) => void): this
   on (event: 'temperature', listener: (information: TemperatureInformation['result']) => void): this
   on (event: 'status', listener: (status: StatusInformation['result']) => void): this
+  once (event: 'connected' | 'disconnected', listener: () => void): this
+  once (event: 'information', listener: (information: PrinterInformation['result']) => void): this
+  once (event: 'endstop', listener: (endstop: EndstopStatus['result']) => void): this
+  once (event: 'temperature', listener: (information: TemperatureInformation['result']) => void): this
+  once (event: 'status', listener: (status: StatusInformation['result']) => void): this
 }
 
 export class Printer extends EventEmitter {
@@ -45,7 +50,6 @@ export class Printer extends EventEmitter {
 
   public send (cmd: string) {
     if (!this.socket) throw new Error('Tried to write command without connecting first')
-    console.log(`Writing: ${cmd}`)
     this.socket.write(cmd)
   }
 
