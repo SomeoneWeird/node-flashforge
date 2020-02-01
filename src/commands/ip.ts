@@ -21,5 +21,7 @@ export default class IPs extends Command {
     printers.forEach((printer) => {
       console.log(`- ${printer.host}:${printer.port}`)
     })
+
+    process.exit()
   }
 }
