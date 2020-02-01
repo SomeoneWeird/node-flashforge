@@ -6,7 +6,7 @@ import { Command, EndstopStatus, parseCommand, PrinterInformation, StatusInforma
 import { commands } from './printers/adventurer3'
 
 interface PrinterOptions {
-  host: string,
+  host: string
   port?: number
 }
 
@@ -37,7 +37,7 @@ export class Printer extends EventEmitter {
     this.socket = null
   }
 
-  public connect () {
+  public connect (): void {
     this.socket = new net.Socket()
     this.socket.on('data', (buffer) => this.parse(buffer))
     this.socket.connect({
@@ -48,12 +48,12 @@ export class Printer extends EventEmitter {
     })
   }
 
-  public send (cmd: string) {
+  public send (cmd: string): void {
     if (!this.socket) throw new Error('Tried to write command without connecting first')
     this.socket.write(cmd)
   }
 
-  private parse (buffer: Buffer) {
+  private parse (buffer: Buffer): void {
     const parsed = parseCommand(buffer)
     if (!parsed) return console.log('unknown command:', { buffer, s: buffer.toString() })
 
@@ -86,7 +86,7 @@ export class Printer extends EventEmitter {
 
 const multicastAddress = '225.0.0.9'
 const multicastPort = 19000
-const searchMessage = Buffer.from([ 0xc0, 0xa8, 0x01, 0x43, 0x46, 0x50, 0x00, 0x00 ])
+const searchMessage = Buffer.from([ 0xC0, 0xA8, 0x01, 0x43, 0x46, 0x50, 0x00, 0x00 ])
 const searchPort = 18000
 
 export function findPrinters (): Promise<Printer[]> {
@@ -114,47 +114,3 @@ export function findPrinters (): Promise<Printer[]> {
     }, 2000)
   })
 }
-
-// findPrinters().then((printers) => {
-//   printers[0].on('status', (status) => {
-//     console.log(`Got status - percent complete: ${status.percentage}%`)
-
-//     console.log('Sending disconnect')
-//     printers[0].send(commands.disconnect)
-//   })
-
-//   printers[0].on('temperature', (info) => {
-//     console.log('Got temperature information:', info)
-//     printers[0].send(commands.status)
-//   })
-
-//   printers[0].on('endstop', (endstop) => {
-//     console.log('Got printer endstop status:', endstop)
-
-//     console.log('Getting temperature info')
-//     printers[0].send(commands.temperature)
-//   })
-
-//   printers[0].on('information', (information) => {
-//     console.log('Found printer:', {
-//       host: printers[0].host,
-//       port: printers[0].port,
-//       information
-//     })
-//     console.log('Sending endstop')
-//     printers[0].send(commands.endstopStatus)
-//   })
-
-//   printers[0].on('disconnected', () => {
-//     console.log('Got disconnect confirmation')
-//   })
-
-//   printers[0].on('connected', () => {
-//     console.log('Connected, sending debug commands')
-//     printers[0].send(commands.info)
-//   })
-
-//   printers[0].connect()
-// }).catch(() => {
-//   console.error('err')
-// })

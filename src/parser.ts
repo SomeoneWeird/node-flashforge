@@ -43,16 +43,18 @@ export interface PrinterInformation extends CommandParseResult<Command.PrinterIn
   macAddress: string
 }> {}
 
+export interface EndStopStatusSLJF {
+  s: number,
+  l: number,
+  j: number,
+  f: number
+}
+
 export interface EndstopStatus extends CommandParseResult<Command.EndstopStatus, {
   endstop: XYZ,
   machineStatus: string,
   moveMode: string,
-  status: {
-    s: number,
-    l: number,
-    j: number,
-    f: number
-  }
+  status: EndStopStatusSLJF
 }> {}
 
 interface TemperaturePair {
@@ -101,19 +103,19 @@ function getPair<T> (pairs: Array<string[] | null>, searchName: string, defaultV
 }
 
 function parseColonDelimited<T> (value: string, defaultValue: T, keys: string[], numbers?: boolean): T {
-  const regex = new RegExp(keys.map((key) => `${key}:([^\s]+)`).join('\\s'))
+  const regex = new RegExp(keys.map((key) => `${key}:([^\\s]+)`).join('\\s'))
 
   const match = value.match(regex)
   if (!match) return defaultValue
 
-  const out: {[key: string]: any} = {}
+  const out: {[key: string]: string | number} = {}
 
   match.shift()
 
   for (let i = 0; i < keys.length; i++) {
     let v: string | number = match[i].trim()
 
-    if (numbers) v = parseInt(v)
+    if (numbers) v = parseInt(v, 10)
 
     out[keys[i]] = v
   }
@@ -141,12 +143,12 @@ function parseLines ({ data, overrides }: ParseLinesOptions): Array<string[] | n
 
     return line.split(':')
   })
-  .filter(Boolean)
-  .map((pair) => {
-    if (!pair) return null
-    if (pair[1].substr(0, 1) === ' ') pair[1] = pair[1].substr(1)
-    return pair
-  })
+    .filter(Boolean)
+    .map((pair) => {
+      if (!pair) return null
+      if (pair[1].substr(0, 1) === ' ') pair[1] = pair[1].substr(1)
+      return pair
+    })
 
   return pairs
 }
@@ -158,23 +160,23 @@ function parseStatusInformation (data: string[]): StatusInformation | null {
   return {
     command: Command.Status,
     result: {
-      percentage: parseInt(match[1])
+      percentage: parseInt(match[1], 10)
     }
   }
 }
 
 function parseTemperatureInformation (data: string[]): TemperatureInformation | null {
   // TODO: This needs to be expanded to capture multiple tools
-  const match = data.toString().match(/T0:([^\/]+)\s?\/([^\]d]+)\sB:([^\/]+)\s?\/([^\]d]+)/)
+  const match = data.toString().match(/T0:([^/]+)\s?\/([^\]d]+)\sB:([^/]+)\s?\/([^\]d]+)/)
   if (!match) return null
 
   return {
     command: Command.Temperature,
     result: {
       tools: [
-        { current: parseInt(match[1]), target: parseInt(match[2]) }
+        { current: parseInt(match[1], 10), target: parseInt(match[2], 10) }
       ],
-      bed: { current: parseInt(match[3]), target: parseInt(match[4]) }
+      bed: { current: parseInt(match[3], 10), target: parseInt(match[4], 10) }
     }
   }
 }
@@ -188,7 +190,7 @@ function parsePrinterInformation (data: string[]): PrinterInformation | null {
     ]
   })
 
-  const parseVolume = (value: string) => parseColonDelimited<XYZ>(value, defaultXYZ, [
+  const parseVolume = (value: string): XYZ => parseColonDelimited<XYZ>(value, defaultXYZ, [
     'X', 'Y', 'Z'
   ], true)
 
@@ -197,7 +199,7 @@ function parsePrinterInformation (data: string[]): PrinterInformation | null {
   const version = getPair<string>(pairs, 'Firmware', 'Unknown firmware')
   const serial = getPair<string>(pairs, 'SN', 'Unknown serial')
   const buildVolume = getPair<XYZ>(pairs, 'buildVolume', { x: -1, y: -1, z: -1 }, parseVolume)
-  const toolCount = getPair<number>(pairs, 'Tool Count', -1, (value) => parseInt(value))
+  const toolCount = getPair<number>(pairs, 'Tool Count', -1, (value) => parseInt(value, 10))
   const macAddress = getPair<string>(pairs, 'macAddress', 'Unknown MAC Address', (value) => value.replace('Mac Address: ', '').replace(/\n/g, ''))
 
   return {
@@ -223,15 +225,15 @@ function parseEndstopStatus (data: string[]): EndstopStatus | null {
     ]
   })
 
-  const defaultStatus: EndstopStatus['result']['status'] = {
+  const defaultStatus: EndStopStatusSLJF = {
     s: -1,
     l: -1,
     j: -1,
     f: -1
   }
 
-  const parseEndstop = (value: string) => parseColonDelimited<XYZ>(value, defaultXYZ, [ 'X-max', 'Y-max', 'Z-max' ], true)
-  const parseStatus = (value: string) => parseColonDelimited(value, defaultStatus, [ 'S', 'L', 'J', 'F' ], true)
+  const parseEndstop = (value: string): XYZ => parseColonDelimited<XYZ>(value, defaultXYZ, [ 'X-max', 'Y-max', 'Z-max' ], true)
+  const parseStatus = (value: string): EndStopStatusSLJF => parseColonDelimited(value, defaultStatus, [ 'S', 'L', 'J', 'F' ], true)
 
   const machineStatus = getPair<string>(pairs, 'MachineStatus', 'Unknown status')
   const moveMode = getPair<string>(pairs, 'MoveMode', 'Unknown move mode')

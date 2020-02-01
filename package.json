@@ -20,12 +20,17 @@
     "@oclif/dev-cli": "^1.22.2",
     "@types/node": "^12.12.9",
     "@types/node-notifier": "^5.4.0",
-    "eslint": "^6.6.0",
+    "@typescript-eslint/eslint-plugin": "^2.18.0",
+    "@typescript-eslint/parser": "^2.18.0",
+    "eslint": "^6.8.0",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^0.1.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "globby": "^10.0.1",
-    "tslint": "^5.20.1",
-    "tslint-config-standard": "^9.0.0",
     "typescript": "^3.7.2"
   },
   "scripts": {
@@ -35,7 +40,7 @@
     "test": "echo NO TESTS",
     "version": "oclif-dev readme && git add README.md",
     "build": "tsc -p .",
-    "pretest": "tslint -p .",
+    "pretest": "eslint src/**/*.ts",
     "prepublish": "npm run build"
   },
   "repository": {

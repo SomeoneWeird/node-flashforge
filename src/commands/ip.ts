@@ -1,5 +1,4 @@
 import { Command, flags } from '@oclif/command'
-import * as chalk from 'chalk'
 
 import { findPrinters } from '../flashforge'
 
@@ -10,7 +9,7 @@ export default class IPs extends Command {
     help: flags.help({ char: 'h' })
   }
 
-  public async run () {
+  public async run (): Promise<void> {
     const printers = await findPrinters()
 
     if (printers.length === 0) {

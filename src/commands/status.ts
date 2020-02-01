@@ -14,8 +14,8 @@ export default class Status extends Command {
     watch: flags.boolean({ char: 'w' })
   }
 
-  public async run () {
-    const { args, flags: opts } = this.parse(Status)
+  public async run (): Promise<void> {
+    const { flags: opts } = this.parse(Status)
 
     const printers = await findPrinters()
 
@@ -38,12 +38,12 @@ export default class Status extends Command {
             }
 
             const bar = new Bar({
-              format: `Printing [{bar}] {percentage}%`
+              format: 'Printing [{bar}] {percentage}%'
             }, Presets.shades_classic)
 
             bar.start(100, status.percentage)
 
-            const exit = () => {
+            const exit = (): never => {
               bar.stop()
               printer.send(commands.disconnect)
               process.exit(0)
@@ -58,7 +58,7 @@ export default class Status extends Command {
 
               if (update.percentage === 100) {
                 notifier.notify({
-                  title: `FlashForge`,
+                  title: 'FlashForge',
                   message: `${info.name} has finished printing`
                 })
                 exit()
