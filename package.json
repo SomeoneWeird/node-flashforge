@@ -13,7 +13,7 @@
     "@types/cli-progress": "^1.8.1",
     "chalk": "^3.0.0",
     "cli-progress": "^3.4.0",
-    "node-notifier": "^6.0.0",
+    "node-notifier": "^8.0.1",
     "tslib": "^1.10.0"
   },
   "devDependencies": {
